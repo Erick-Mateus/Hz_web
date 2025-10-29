@@ -1,0 +1,7 @@
+/preview/*
+  Basic-Auth: founder:Hz123!next
+  X-Robots-Tag: noindex, nofollow
+
+/*
+  X-Robots-Tag: noindex, nofollow
+

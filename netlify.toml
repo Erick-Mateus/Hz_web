@@ -1,20 +1,15 @@
-# netlify.toml  — minimal, parse-safe
+# netlify.toml
 
 [build]
-  # If your built site lives in "dist" or "build", change this path.
   publish = "."
   command = ""
 
-# Global Edge settings (this is where 'environment' goes)
-[edge_functions]
-  environment = ["MH_SESSION_SECRET"]
-
-# Register the Edge auth gate (your file: netlify/edge-functions/auth.ts)
+# Register the Edge auth gate
 [[edge_functions]]
   function = "auth"
   path = "/*"
 
-# Map the login API to your Function (must be BEFORE SPA fallback)
+# Map login API to your Function (keep BEFORE SPA fallback)
 [[redirects]]
   from = "/api/invite"
   to = "/.netlify/functions/invite"

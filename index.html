@@ -66,20 +66,31 @@
 
   <div class="card w-full max-w-lg rounded-xl border border-white/10 bg-card p-6 shadow-lg md:p-10">
     
-    <h1 class="h2 text-2xl font-bold tracking-tight text-text md:text-3xl">
-      Advisors and Collaborators Private Access
-    </h1>
-    
-    <p class="lead mx-auto mt-4 text-lg text-muted">
-	  By entering this page, you will be part of a <strong>carefully selected group</strong> invited to explore 
+	
+	
+	<h1 class="text-2xl font-bold md:text-3xl text-text mb-4">
+	  Private Preview — Access Granted by Invitation
+	</h1>
+	
+	<p class="text-cyan-light text-sm uppercase tracking-widest mb-2">
+    Welcome to the MaxiHertz Private Preview
+  </p>
+
+	<p class="text-muted text-lg leading-relaxed mb-4">
+	  By entering this page, you become part of a <strong>carefully selected group</strong> invited to explore 
 	  <strong>MaxiHertz’s mission</strong>. This beta version is shared exclusively with 
 	  <strong>advisors</strong>, <strong>early collaborators</strong>, and those who have expressed interest 
-	  in supporting our work — or whom we believe can meaningfully contribute to it at this stage.
+	  in supporting our work — or whom we believe can meaningfully contribute at this early stage.
 	</p>
 
-	<p class="mt-4 text-muted">
-	  If you have reached this point and are interested in exploring what we do, please contact us at 
-	  <a href="mailto:info@maxihertz.com" class="text-cyan hover:text-cyan-light">info@maxihertz.com</a>
+	<p class="text-muted text-lg leading-relaxed mb-4">
+	  Your feedback during this phase will help shape the evolution of our mission.
+	</p>
+
+	<p class="text-muted text-sm">
+	  If you have reached this point and do not yet have an access key but are interested in exploring what we do, 
+	  please contact us at 
+	  <a href="mailto:info@maxihertz.com" class="text-cyan hover:text-cyan-light">info@maxihertz.com</a>.
 	</p>
 
   <form class="mt-8 w-full max-w-sm mx-auto" id="invite-form">
@@ -107,53 +118,23 @@
   <p id="invite-error" class="mt-3 text-sm text-red-300 hidden">Invalid invitation code.</p>
 </form>
 
+<!-- GOOD: call it only after the user submits the code -->
 <script>
-  const form = document.getElementById('invite-form');
-  const err = document.getElementById('invite-error');
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    err.classList.add('hidden');
-    err.textContent = '';
-
-    const code = document.getElementById('password').value;
-
-    try {
-      const res = await fetch('/.netlify/functions/invite', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code })
-      });
-
-      const contentType = res.headers.get('content-type') || '';
-      const maybeJson = contentType.includes('application/json');
-      const data = maybeJson ? await res.json() : null;
-
-      if (!res.ok) {
-        if (res.status === 404) {
-          err.textContent = 'Function not found (404). Check your deploy includes /netlify/functions/invite.js at the site root.';
-        } else if (res.status === 401) {
-          err.textContent = (data && data.message) || 'Invalid invitation code.';
-        } else {
-          err.textContent = `Server error (${res.status}).`;
-        }
-        err.classList.remove('hidden');
-        return;
-      }
-
-      if (data && data.ok && data.redirect) {
-        window.location.href = data.redirect; // will trigger Basic-Auth on /preview/
-      } else {
-        err.textContent = 'Unexpected response. Check function logs.';
-        err.classList.remove('hidden');
-      }
-    } catch (e2) {
-      console.error('Network/JS error:', e2);
-      err.textContent = 'Network error (request failed or non-JSON response). Open DevTools → Network to inspect.';
-      err.classList.remove('hidden');
-    }
+async function submitInvite(code) {
+  const res = await fetch('/.netlify/functions/invite', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code })
   });
+  const data = await res.json().catch(() => ({}));
+  if (res.ok && data.ok) {
+    window.location.href = '/app';
+  } else {
+    showError('Invalid invitation code.');
+  }
+}
 </script>
+
 
 
     

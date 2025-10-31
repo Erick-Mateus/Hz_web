@@ -110,6 +110,43 @@
     }
     /* --- END: Canvas Network Styling --- */
 
+
+	/* --- Refinement: Team Photo Styling (Enhanced) --- */
+		.team-photo {
+		  /* Initial state: Sharper, slightly cooler, more contrast */
+		  filter: 
+			saturate(0.9)            /* Slightly desaturate to cool tones */
+			contrast(1.1)            /* Boost contrast for definition */
+			brightness(1.05)         /* Slight brightness increase */
+			grayscale(10%)           /* Very slight grayscale for polish */
+			url('#sharpen-filter');  /* Apply SVG sharpen filter */
+		  transition: filter 0.3s ease-in-out;
+		  /* Subtle "rim light" effect for presence */
+		  box-shadow: 0 0 8px rgba(255, 255, 255, 0.05); /* Very faint white glow */
+		}
+
+		/* On hover of the parent card, restore full vibrant color and remove subtle polish filters */
+		.group:hover .team-photo {
+		  filter: grayscale(0%) contrast(1) brightness(1) saturate(1) url('#no-filter'); /* Remove sharpening on hover too */
+		  box-shadow: none; /* Remove rim light on hover if desired, or keep it */
+		}
+		/* --- END: Team Photo Styling --- */
+		
+		/* --- ENHANCED: Team Photo "Studio Light" Filter --- */
+    .team-photo {
+      /* This is the base style: slightly cooler, higher contrast */
+      filter: grayscale(15%) contrast(110%) brightness(98%) saturate(105%);
+      transition: filter 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    /* On hover of the parent card, bring the photo to full, natural color */
+    .group:hover .team-photo {
+      filter: grayscale(0%) contrast(100%) brightness(1.0) saturate(100%);
+    }
+    /* --- END: Team Photo Styling --- */
+	
+	
+	
   </style>
 
 </head>
@@ -238,11 +275,7 @@
 				 </div>
 				</article>
 				 
-				 
-				 
-				 
-				 
-				 
+				 			 
 				 
 			  </div>
 			  
@@ -264,7 +297,7 @@
           <div class="section-header mx-auto max-w-3xl text-center">
              <p class="kicker font-grotesk text-sm font-bold uppercase tracking-widest text-cyan">Our Vision</p>
              <h2 class="h2 mt-2 text-3xl font-bold leading-tight tracking-tight md:text-4xl lg:text-5xl">The Integrated Radar-Communications Systems Revolution</h2>
-             <p class="lead mx-auto mt-4 text-lg text-muted md:text-xl">We are building a single intelligent platform that unites sensing, communications and Electronic Warfare.</p>
+             <p class="lead mx-auto mt-4 text-lg text-muted md:text-xl">A unified, intelligent platform merging sensing, communications, and spectrum resilience — enabling awareness, connectivity, and trust across all domains.</p>
           </div>
           <div class="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2">
              <article class="h-full rounded-xl border border-white/10 bg-card p-6 shadow transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-cyan/40 hover:shadow-cyan-lg md:p-8"><h3 class="h3 mb-2 text-xl font-bold md:text-2xl">Goal: Unified Waveform</h3><p class="text-muted text-base md:text-lg">Design a platform merging radar & comms...</p></article>
@@ -308,9 +341,23 @@
          </div>
          <h3 class="h3 mt-16 text-center text-2xl font-bold md:text-3xl">Founding Team</h3>
          <div class="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-3">
-           <div class="overflow-hidden rounded-xl border border-white/10 bg-card text-center shadow transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-cyan/40 hover:shadow-cyan-lg"><div class="photo flex h-56 items-center justify-center bg-bg-950 text-muted">[Photo]</div><div class="bio p-6"><h4 class="h3 text-xl font-bold md:text-2xl">Erick Lima</h4><p class="font-semibold text-cyan">Founder & CEO</p><p class="mt-2 text-sm text-muted">Ex-Principal RF Eng. MS, Cambridge...</p></div></div>
-           <div class="overflow-hidden rounded-xl border border-white/10 bg-card text-center shadow transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-cyan/40 hover:shadow-cyan-lg"><div class="photo flex h-56 items-center justify-center bg-bg-950 text-muted">[Photo]</div><div class="bio p-6"><h4 class="h3 text-xl font-bold md:text-2xl">[Name]</h4><p class="font-semibold text-cyan">CTO / Head of Eng.</p><p class="mt-2 text-sm text-muted">Ex-xx, Staff Eng...</p></div></div>
-           <div class="overflow-hidden rounded-xl border border-white/10 bg-card text-center shadow transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-cyan/40 hover:shadow-cyan-lg"><div class="photo flex h-56 items-center justify-center bg-bg-950 text-muted">[Photo]</div><div class="bio p-6"><h4 class="h3 text-xl font-bold md:text-2xl">[Name]</h4><p class="font-semibold text-cyan">COO / Strategy</p><p class="mt-2 text-sm text-muted">Ex-xx... 2x founder...</p></div></div>
+           <div class="overflow-hidden rounded-xl border border-white/10 bg-card text-center shadow transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-cyan/40 hover:shadow-cyan-lg">
+			  <div class="photo h-56 bg-bg-950">
+				<img 
+				  src="images/founder_erick.jpg" 
+				  alt="Erick Lima, Founder & CEO" 
+				  class="h-full w-full object-cover object-center">
+			  </div>
+			  <div class="bio p-6">
+				<h4 class="h3 text-xl font-bold md:text-2xl">Erick Lima</h4>
+				<p class="font-semibold text-cyan">Founder & CEO</p>
+				<p class="mt-2 text-sm text-muted">Former Principal RF Systems Engineer — pioneering the convergence of sensing, communications, and intelligence to shape the next technological frontier.</p>
+			  </div>
+			</div>
+					   
+		   
+           <div class="overflow-hidden rounded-xl border border-white/10 bg-card text-center shadow transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-cyan/40 hover:shadow-cyan-lg"><div class="photo flex h-56 items-center justify-center bg-bg-950 text-muted">[Photo]</div><div class="bio p-6"><h4 class="h3 text-xl font-bold md:text-2xl">[Name]</h4><p class="font-semibold text-cyan">CTO (confidential appointment)</p><p class="mt-2 text-sm text-muted">IP-driven engineer with proven leadership in high-impact innovation across advanced communication and signal processing architectures.</p></div></div>
+           <div class="overflow-hidden rounded-xl border border-white/10 bg-card text-center shadow transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-cyan/40 hover:shadow-cyan-lg"><div class="photo flex h-56 items-center justify-center bg-bg-950 text-muted">[Photo]</div><div class="bio p-6"><h4 class="h3 text-xl font-bold md:text-2xl">[Name]</h4><p class="font-semibold text-cyan">COO / Strategy</p><p class="mt-2 text-sm text-muted">Ideal profile blends hands-on startup experience, business development acumen, and the ability to translate technology vision into market traction.</p></div></div>
          </div>
          <h3 class="h3 mt-20 text-center text-2xl font-bold md:text-3xl">Strategic Advisors</h3>
          <div class="mx-auto mt-12 grid max-w-6xl grid-cols-2 gap-8 md:grid-cols-4">

@@ -1,0 +1,13 @@
+[build]
+  publish = "."          # ← or your actual build folder (dist, build, etc.)
+  command = ""           # static site, no build step required
+
+# Redirect any unmatched paths to index.html (optional for SPAs)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Optional: enable Netlify Analytics if you use it
+# [analytics]
+#   publish = "."

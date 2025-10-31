@@ -120,20 +120,68 @@
 
 <!-- GOOD: call it only after the user submits the code -->
 <script>
-async function submitInvite(code) {
-  const res = await fetch('/.netlify/functions/invite', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code })
-  });
-  const data = await res.json().catch(() => ({}));
-  if (res.ok && data.ok) {
-    window.location.href = '/app';
-  } else {
-    showError('Invalid invitation code.');
+(function () {
+  const form   = document.getElementById('invite-form');
+  const input  = document.getElementById('password');   // name="code"
+  const error  = document.getElementById('invite-error');
+  const button = form ? form.querySelector('button[type="submit"]') : null;
+
+  if (!form || !input || !button) {
+    console.warn('[invite] missing form/input/button'); return;
   }
-}
+
+  function showError(msg) {
+    if (error) {
+      error.textContent = msg || 'Invalid invitation code.';
+      error.classList.remove('hidden');
+    } else {
+      alert(msg || 'Invalid invitation code.');
+    }
+  }
+  function hideError() { if (error) error.classList.add('hidden'); }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const code = (input.value || '').trim();
+    if (!code) { showError('Please enter your invitation code.'); return; }
+
+    hideError();
+    button.disabled = true; button.setAttribute('aria-busy','true');
+
+    try {
+      const res = await fetch('/.netlify/functions/invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+      });
+
+      // Your function returns {"ok":true} when valid and sets mh_token cookie
+      let data = {};
+      try { data = await res.clone().json(); } catch {}
+
+      if (res.ok && data.ok) {
+        const url = new URL(window.location.href);
+        const next = url.searchParams.get('next');
+        window.location.replace(next && next.startsWith('/') ? next : '/preview/');
+        return;
+      }
+
+      showError(res.status === 401 ? 'Invalid invitation code.' : 'Login failed. Please try again.');
+    } catch (err) {
+      console.error('[invite] error', err);
+      showError('Network error. Please try again.');
+    } finally {
+      button.disabled = false; button.removeAttribute('aria-busy');
+    }
+  }
+
+  form.addEventListener('submit', handleSubmit);
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); form.requestSubmit ? form.requestSubmit() : handleSubmit(e); }
+  });
+})();
 </script>
+
 
 
 

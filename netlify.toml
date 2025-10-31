@@ -1,13 +1,52 @@
 [build]
-  publish = "."          # ← or your actual build folder (dist, build, etc.)
-  command = ""           # static site, no build step required
+  publish = "."
+  command = ""
 
-# Redirect any unmatched paths to index.html (optional for SPAs)
+# Edge guard
+[[edge_functions]]
+  function = "auth"
+  path = "/*"
+
+# Map browser POST /api/invite -> Netlify Function
+[[redirects]]
+  from = "/api/invite"
+  to = "/.netlify/functions/invite"
+  status = 200
+  force = true
+
+# SPA fallback LAST
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-# Optional: enable Netlify Analytics if you use it
-# [analytics]
-#   publish = "."
+
+# --- Edge Function: server-side gate ---
+[edge_functions]
+  # (optional global settings)
+
+[[edge_functions]]
+  function = "auth"            # netlify/edge-functions/auth.ts
+  path = "/*"                  # runs on every path
+
+# --- Serverless endpoints (put BEFORE the SPA catch-all) ---
+# Validate/login endpoint used by your invite form
+[[redirects]]
+  from = "/api/validate"
+  to = "/.netlify/functions/validate"
+  status = 200
+  force = true
+
+# (Optional) if you still use this legacy endpoint anywhere:
+[[redirects]]
+  from = "/api/invite"
+  to = "/.netlify/functions/invite"
+  status = 200
+  force = true
+
+# --- SPA fallback (keep LAST) ---
+# Ensures all non-file routes render index.html (but AFTER functions)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

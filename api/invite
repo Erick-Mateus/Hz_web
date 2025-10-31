@@ -1,0 +1,7 @@
+const res = await fetch("/api/invite", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ code: userCode })
+});
+const data = await res.json();
+if (res.ok && data.ok) location.href = "/preview/"; else showError("Invalid invitation code.");

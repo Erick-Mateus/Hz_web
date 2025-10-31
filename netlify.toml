@@ -2,19 +2,22 @@
   publish = "."
   command = ""
 
-# --- Edge function that guards private routes ---
+# Make MH_SESSION_SECRET available to Edge Functions
+[edge_functions]
+  environment = ["MH_SESSION_SECRET"]
+
 [[edge_functions]]
   function = "auth"
   path = "/*"
 
-# --- Map your login POST to the Netlify Function (must be BEFORE SPA fallback) ---
+# Map login to your function (keep before SPA fallback)
 [[redirects]]
   from = "/api/invite"
   to = "/.netlify/functions/invite"
   status = 200
   force = true
 
-# --- SPA fallback (keep LAST) ---
+# SPA fallback LAST
 [[redirects]]
   from = "/*"
   to = "/index.html"

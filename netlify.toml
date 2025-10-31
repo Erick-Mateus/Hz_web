@@ -1,23 +1,26 @@
+# netlify.toml
+
 [build]
   publish = "."
   command = ""
 
-# Expose secret to Edge (needed for cookie verification)
+# Make MH_SESSION_SECRET available to Edge Functions
 [edge_functions]
   environment = ["MH_SESSION_SECRET"]
 
+# Register the Edge auth gate on all routes
 [[edge_functions]]
   function = "auth"
   path = "/*"
 
-# Map login API to the function (before SPA fallback)
+# Route the login POST to your Netlify Function (must be BEFORE SPA fallback)
 [[redirects]]
   from = "/api/invite"
   to = "/.netlify/functions/invite"
   status = 200
   force = true
 
-# SPA fallback LAST
+# SPA fallback — keep LAST
 [[redirects]]
   from = "/*"
   to = "/index.html"

@@ -1,102 +1,86 @@
-// netlify/functions/invite.ts
-// Netlify Functions (Deno runtime). Validates invite code server-side,
-// then sets a signed session cookie "mh_token" (HMAC-SHA256).
-// Requires env vars: MH_SESSION_SECRET and MH_INVITE_CODE_HASHES (SHA-256 hashes).
+// netlify/functions/invite.js
+// Node.js Netlify Function (CommonJS).
+// Validates invite code server-side and sets a signed cookie "mh_token".
 
-type Body = { code?: string };
+const crypto = require("crypto");
 
-function b64url(bytes: ArrayBuffer | Uint8Array | string): string {
-  let u8: Uint8Array;
-  if (typeof bytes === "string") u8 = new TextEncoder().encode(bytes);
-  else if (bytes instanceof Uint8Array) u8 = bytes;
-  else u8 = new Uint8Array(bytes);
-  const bin = String.fromCharCode(...u8);
-  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-}
-
-async function sha256Hex(s: string) {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
-}
-
-function timingSafeEq(a: string, b: string) {
+// Helper: constant-time compare
+function timingSafeEqHex(a, b) {
   if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
+  // compare as buffers to avoid early-exit timing leaks
+  const ba = Buffer.from(a, "hex");
+  const bb = Buffer.from(b, "hex");
+  if (ba.length !== bb.length) return false;
+  return crypto.timingSafeEqual(ba, bb);
 }
 
-export default async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204 }); // allow preflight if any
-  }
-  if (req.method !== "POST") {
-    return new Response("Method Not Allowed", { status: 405 });
+exports.handler = async (event, context) => {
+  // Allow preflight
+  if (event.httpMethod === "OPTIONS") {
+    return { statusCode: 204, headers: {} };
   }
 
-  const secret = Deno.env.get("MH_SESSION_SECRET") || "";
-  const hashesCsv = Deno.env.get("MH_INVITE_CODE_HASHES") || "";
+  if (event.httpMethod !== "POST") {
+    return { statusCode: 405, body: "Method Not Allowed" };
+  }
+
+  const secret = process.env.MH_SESSION_SECRET || "";
+  const hashesCsv = process.env.MH_INVITE_CODE_HASHES || "";
   const inviteHashes = hashesCsv.split(",").map(s => s.trim()).filter(Boolean);
 
   if (!secret || inviteHashes.length === 0) {
-    // Fail safe if not configured
-    return new Response("Server not configured", { status: 500 });
+    return { statusCode: 500, body: "Server not configured" };
   }
 
   let code = "";
   try {
-    const body = (await req.json()) as Body;
+    const body = JSON.parse(event.body || "{}");
     code = (body.code || "").trim();
   } catch {
-    return new Response("Bad Request", { status: 400 });
+    return { statusCode: 400, body: "Bad Request" };
   }
 
   if (!code) {
-    // uniform response for missing/invalid
-    await new Promise(r => setTimeout(r, 150)); // jitter for timing uniformity
-    return new Response(JSON.stringify({ ok: false }), {
-      status: 401,
+    // uniform-ish timing
+    await new Promise(r => setTimeout(r, 150));
+    return {
+      statusCode: 401,
       headers: { "Content-Type": "application/json" },
-    });
+      body: JSON.stringify({ ok: false })
+    };
   }
 
-  // Compare hash of provided code against allowed list
-  const hash = await sha256Hex(code);
-  const match = inviteHashes.some(h => timingSafeEq(h, hash));
+  // Hash the provided code and compare against allowed list
+  const hash = crypto.createHash("sha256").update(code, "utf8").digest("hex");
+  const match = inviteHashes.some(h => timingSafeEqHex(h, hash));
 
-  // constant-ish timing
-  await new Promise(r => setTimeout(r, 120 + Math.random() * 80));
+  // Add small jitter to reduce timing hints
+  await new Promise(r => setTimeout(r, 100 + Math.random() * 80));
 
   if (!match) {
-    return new Response(JSON.stringify({ ok: false }), {
-      status: 401,
+    return {
+      statusCode: 401,
       headers: { "Content-Type": "application/json" },
-    });
+      body: JSON.stringify({ ok: false })
+    };
   }
 
-  // Create signed session token (14 days)
+  // Build HMAC-signed session token (14 days)
   const payload = { iat: Date.now(), exp: Date.now() + 14 * 24 * 60 * 60 * 1000 };
-  const payloadB64 = b64url(JSON.stringify(payload));
+  const payloadStr = JSON.stringify(payload);
+  const payloadB64 = Buffer.from(payloadStr, "utf8").toString("base64url");
+  const sig = crypto.createHmac("sha256", secret).update(payloadB64, "utf8").digest("base64url");
+  const token = `${payloadB64}.${sig}`;
 
-  const key = await crypto.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"]
-  );
-  const sigBuf = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(payloadB64));
-  const token = `${payloadB64}.${b64url(sigBuf)}`;
-
-  const headers = new Headers({
+  const headers = {
     "Content-Type": "application/json",
-  });
+    // HttpOnly cookie for the Edge gate to read
+    "Set-Cookie": `mh_token=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${14 * 24 * 60 * 60}`
+  };
 
-  // HttpOnly session cookie seen by Edge Function
-  headers.append(
-    "Set-Cookie",
-    `mh_token=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${14 * 24 * 60 * 60}`
-  );
-
-  return new Response(JSON.stringify({ ok: true }), { status: 200, headers });
+  return {
+    statusCode: 200,
+    headers,
+    body: JSON.stringify({ ok: true })
+  };
 };

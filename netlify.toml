@@ -2,42 +2,12 @@
   publish = "."
   command = ""
 
-# Edge guard
+# --- Edge function that guards private routes ---
 [[edge_functions]]
   function = "auth"
   path = "/*"
 
-# Map browser POST /api/invite -> Netlify Function
-[[redirects]]
-  from = "/api/invite"
-  to = "/.netlify/functions/invite"
-  status = 200
-  force = true
-
-# SPA fallback LAST
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
-
-# --- Edge Function: server-side gate ---
-[edge_functions]
-  # (optional global settings)
-
-[[edge_functions]]
-  function = "auth"            # netlify/edge-functions/auth.ts
-  path = "/*"                  # runs on every path
-
-# --- Serverless endpoints (put BEFORE the SPA catch-all) ---
-# Validate/login endpoint used by your invite form
-[[redirects]]
-  from = "/api/validate"
-  to = "/.netlify/functions/validate"
-  status = 200
-  force = true
-
-# (Optional) if you still use this legacy endpoint anywhere:
+# --- Map your login POST to the Netlify Function (must be BEFORE SPA fallback) ---
 [[redirects]]
   from = "/api/invite"
   to = "/.netlify/functions/invite"
@@ -45,7 +15,6 @@
   force = true
 
 # --- SPA fallback (keep LAST) ---
-# Ensures all non-file routes render index.html (but AFTER functions)
 [[redirects]]
   from = "/*"
   to = "/index.html"

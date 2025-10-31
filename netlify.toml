@@ -1,14 +1,18 @@
-# netlify.toml
+# netlify.toml  (UTF-8, straight quotes)
 
 [build]
   publish = "."
   command = ""
 
-# Register the Edge auth gate AND pass env to it (all in one block)
+# Global settings for Edge Functions
+# (this is where 'environment' goes)
+[edge_functions]
+  environment = ["MH_SESSION_SECRET"]
+
+# Register your Edge auth function
 [[edge_functions]]
   function = "auth"
   path = "/*"
-  environment = ["MH_SESSION_SECRET"]
 
 # Route the login POST to your Netlify Function (must be BEFORE SPA fallback)
 [[redirects]]

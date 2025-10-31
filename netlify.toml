@@ -2,7 +2,7 @@
   publish = "."
   command = ""
 
-# Make MH_SESSION_SECRET available to Edge Functions
+# Expose secret to Edge (needed for cookie verification)
 [edge_functions]
   environment = ["MH_SESSION_SECRET"]
 
@@ -10,7 +10,7 @@
   function = "auth"
   path = "/*"
 
-# Map login to your function (keep before SPA fallback)
+# Map login API to the function (before SPA fallback)
 [[redirects]]
   from = "/api/invite"
   to = "/.netlify/functions/invite"

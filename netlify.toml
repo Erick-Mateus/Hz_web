@@ -4,14 +4,11 @@
   publish = "."
   command = ""
 
-# Make MH_SESSION_SECRET available to Edge Functions
-[edge_functions]
-  environment = ["MH_SESSION_SECRET"]
-
-# Register the Edge auth gate on all routes
+# Register the Edge auth gate AND pass env to it (all in one block)
 [[edge_functions]]
   function = "auth"
   path = "/*"
+  environment = ["MH_SESSION_SECRET"]
 
 # Route the login POST to your Netlify Function (must be BEFORE SPA fallback)
 [[redirects]]

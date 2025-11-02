@@ -1,14 +1,11 @@
 /preview/*
-  Basic-Auth: founder:Hz123!next
-  X-Robots-Tag: noindex, nofollow
   Cache-Control: no-store
+  X-Robots-Tag: noindex, nofollow
 
 /app/*
-  Basic-Auth: founder:Hz123!next
-  X-Robots-Tag: noindex, nofollow
   Cache-Control: no-store
+  X-Robots-Tag: noindex, nofollow
 
 /assets/private/*
-  Basic-Auth: founder:Hz123!next
-  X-Robots-Tag: noindex, nofollow
   Cache-Control: no-store
+  X-Robots-Tag: noindex, nofollow

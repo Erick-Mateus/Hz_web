@@ -146,7 +146,253 @@
     /* --- END: Team Photo Styling --- */
 	
 	
-	
+	 @layer utilities {
+    @keyframes blink { 0%, 100% {opacity: 1} 50% {opacity: .25} }
+    .animate-blink { animation: blink 1.1s infinite; }
+  }
+  
+  
+  /* NEW STYLES FOR IMAGE HOVER EFFECT */
+  .photo {
+    overflow: hidden; /* Ensures the zoom doesn't break card boundaries */
+  }
+
+  .photo img {
+    transition: transform 0.3s ease-in-out, filter 0.3s ease-in-out; /* Smooth transitions */
+    filter: brightness(100%); /* Initial state */
+  }
+
+  .photo:hover img {
+    transform: scale(1.05); /* Slightly zoom in */
+    filter: brightness(115%); /* Make it a bit brighter */
+  }
+
+  /* For the placeholder icons, we can add a subtle scale on hover as well */
+  .photo-placeholder:hover .placeholder-icon {
+    transform: scale(1.1); /* Make icon slightly larger on hover */
+    /* No brightness filter here, as it's an SVG and we want to preserve color */
+  }
+
+  /* Respects user preferences for reduced motion on hover effects too */
+  @media (prefers-reduced-motion: reduce) {
+    .photo:hover img,
+    .photo-placeholder:hover .placeholder-icon {
+      transform: none; /* Disable zoom */
+      filter: none; /* Disable brightness change */
+    }
+  }
+
+/*
+/----------------------------------------------------/
+/  STEP 2: PASTE THIS INSIDE YOUR MAIN <style> IN <head>
+/----------------------------------------------------/
+*/
+
+/* 1. ROADMAP KEYFRAME ANIMATIONS */
+@keyframes roadmapGradientGlow {
+  0% { background-position: 50% 0%; }
+  100% { background-position: 50% 100%; }
+}
+@keyframes roadmapPulseHalo {
+  0%, 100% { box-shadow: 0 0 0 0 #22d3ee26; } /* Faint glow */
+  50% { box-shadow: 0 0 0 10px #22d3ee40, 0 0 0 4px #22D3EE; } /* Halo */
+}
+
+/* 2. ROADMAP TITLE */
+.roadmap-title-h3 {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem; /* 24px */
+  line-height: 1.3;
+  text-align: center;
+  margin-bottom: 3rem;
+  color: #E5EEFF; /* text */
+}
+
+/* 3. ROADMAP LIST (THE CONTAINER) */
+.roadmap-list {
+  position: relative;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  margin-left: 1rem;
+}
+
+/* 4. GRADIENT GLOW (z-index: 1) */
+.roadmap-list::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -3px; 
+  width: 4px;
+  height: 100%;
+  z-index: 1; /* Sits ABOVE the spine, BELOW the item */
+  background: linear-gradient(
+    to bottom,
+    #22D3EE 0%,
+    #020617 50%,
+    #22D3EE 100%
+  );
+  background-size: 100% 200%;
+  animation: roadmapGradientGlow 6s linear infinite;
+}
+
+/* 5. TIMELINE SPINE (z-index: 0) */
+.roadmap-list::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -1px; /* Centers the 2px line */
+  width: 2px;
+  background-color: #A0B3D033; /* spine color */
+  z-index: 0; /* Sits at the very BOTTOM */
+}
+
+/* 6. TIMELINE ITEM (z-index: 2) */
+.roadmap-item {
+  position: relative;
+  padding-left: 3rem;
+  padding-bottom: 3rem;
+  z-index: 2; /* Sits at the TOP */
+  /* This forces a new stacking context, guaranteeing z-index works */
+  transform: translateZ(0);
+}
+.roadmap-item:last-child {
+  padding-bottom: 0;
+}
+
+/* 7. TIMELINE MARKER (CENTERING FIXED) */
+.roadmap-marker {
+  position: absolute;
+  left: -0.8125rem; /* -13px, perfectly centered */
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem; /* 28px */
+  height: 1.75rem; /* 28px */
+  border-radius: 50%;
+  background-color: #080F1E; /* bg-900 */
+  border: 2px solid #A0B3D033; /* spine color */
+  transition: all 0.3s ease;
+}
+.roadmap-marker svg {
+  width: 1rem;
+  height: 1rem;
+  stroke: #020617; /* bg-950 */
+  stroke-width: 2.5;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.3s ease;
+}
+
+/* 8. TIMELINE CONTENT */
+.roadmap-item-quarter {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 1.25rem;
+  line-height: 1.4;
+  margin: 0;
+  color: #E5EEFF; /* text */
+  transition: color 0.3s ease;
+}
+.roadmap-item-description {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #A0B3D0; /* muted */
+  margin: 0.25rem 0 0 0;
+  transition: color 0.3s ease;
+}
+.roadmap-item-status {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: #A0B3D0; /* muted */
+  margin-top: 0.25rem;
+  font-style: italic;
+}
+
+/* 9. STATE-BASED STYLING */
+
+/* --- STATE: UPCOMING --- */
+.roadmap-item[data-status="upcoming"] {
+  opacity: 0.6;
+}
+.roadmap-item[data-status="upcoming"] .roadmap-item-quarter,
+.roadmap-item[data-status="upcoming"] .roadmap-item-description,
+.roadmap-item[data-status="upcoming"] .roadmap-item-status {
+  color: #A0B3D0; /* muted */
+}
+
+/* --- STATE: COMPLETED --- */
+.roadmap-item[data-status="completed"] .roadmap-marker {
+  background-color: #22D3EE; /* cyan */
+  border-color: #22D3EE; /* cyan */
+}
+.roadmap-item[data-status="completed"] .roadmap-marker svg {
+  opacity: 1;
+  transform: scale(1);
+}
+.roadmap-item[data-status="completed"] .roadmap-item-quarter {
+  color: #E5EEFF; /* text */
+}
+.roadmap-item[data-status="completed"] .roadmap-item-description,
+.roadmap-item[data-status="completed"] .roadmap-item-status {
+  color: #A0B3D0; /* muted */
+}
+
+/* --- STATE: CURRENT --- */
+.roadmap-item[data-status="current"] .roadmap-marker {
+  border-color: #22D3EE; /* cyan */
+  animation: roadmapPulseHalo 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+.roadmap-item[data-status="current"] .roadmap-marker::before {
+  content: '';
+  display: block;
+  width: 0.75rem;
+  height: 0.75rem;
+  background-color: #22D3EE; /* cyan */
+  border-radius: 50%;
+}
+.roadmap-item[data-status="current"] .roadmap-item-quarter {
+  color: #22D3EE; /* cyan */
+}
+.roadmap-item[data-status="current"] .roadmap-item-description,
+.roadmap-item[data-status="current"] .roadmap-item-status {
+  color: #E5EEFF; /* text */
+}
+
+/* 10. RESPONSIVE & ACCESSIBILITY */
+@media (min-width: 768px) {
+  .roadmap-title-h3 {
+    font-size: 1.875rem; /* 30px */
+  }
+  .roadmap-item-quarter {
+    font-size: 1.5rem; /* 24px */
+  }
+  .roadmap-item-description {
+    font-size: 1.125rem; /* 18px */
+  }
+  .roadmap-list {
+     margin-left: 2rem;
+  }
+  .roadmap-item {
+     padding-left: 4rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roadmap-list::before,
+  .roadmap-list::after,
+  .roadmap-item[data-status="current"] .roadmap-marker {
+    animation: none;
+  }
+  .roadmap-item[data-status="current"] .roadmap-marker {
+     box-shadow: 0 0 0 4px #22d3ee40; /* Faint glow */
+  }
+}
   </style>
 
 </head>
@@ -305,17 +551,66 @@
              <article class="h-full rounded-xl border border-white/10 bg-card p-6 shadow transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-cyan/40 hover:shadow-cyan-lg md:p-8"><h3 class="h3 mb-2 text-xl font-bold md:text-2xl">Goal: Resilience First</h3><p class="text-muted text-base md:text-lg">Maintain performance under interference...</p></article>
              <article class="h-full rounded-xl border border-white/10 bg-card p-6 shadow transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-cyan/40 hover:shadow-cyan-lg md:p-8"><h3 class="h3 mb-2 text-xl font-bold md:text-2xl">Goal: Multi-Domain Mesh</h3><p class="text-muted text-base md:text-lg">Aim to create a resilient mesh network...</p></article>
           </div>
-          <div class="mx-auto mt-24 max-w-3xl">
-            <h3 class="h3 mb-12 text-center text-2xl font-bold md:text-3xl">Our Path to Market</h3>
-            <div class="timeline relative ml-4 border-l-2 border-slate-700/70">
-                <div class="timeline-item active relative pl-8 pb-10"><h4 class="h3 text-xl font-bold text-cyan md:text-2xl">Q4 2025: Funding / Seed Round</h4><p class="text-muted text-base md:text-lg">Running...</p></div>
-                <div class="timeline-item relative pl-8 pb-10"><h4 class="h3 text-xl font-bold text-text/90 md:text-2xl">Q2 2026: Core Algorithm</h4><p class="text-muted text-base md:text-lg">Complete development...</p></div>
-                <div class="timeline-item relative pl-8 pb-10"><h4 class="h3 text-xl font-bold text-text/90 md:text-2xl">Q4 2026: First Hardware Prototype (TRL 3)</h4><p class="text-muted text-base md:text-lg">Demonstrate a functioning (MVP)...</p></div>
-                <div class="timeline-item relative pl-8"><h4 class="h3 text-xl font-bold text-text/90 md:text-2xl">Q4 2027: First Partner Pilot</h4><p class="text-muted text-base md:text-lg">Begin first pilot program...</p></div>
-            </div>
-          </div>
-       </div>
+		  
+		<div class="roadmap-component-container mx-auto mt-24 max-w-3xl">
+
+  <h3 class="roadmap-title-h3">Our Path to Market</h3>
+  
+  <ol class="roadmap-list" aria-label="Roadmap">
+    
+    <li class="roadmap-item" data-status="completed">
+      <div class="roadmap-marker" aria-hidden="true">
+        <svg viewBox="0 0 16 16" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12.5 4.5L6.5 10.5L3.5 7.5"/>
+        </svg>
+      </div>
+      <div class="roadmap-content">
+        <h4 class="roadmap-item-quarter">Q3 2025</h4>
+        <p class="roadmap-item-description">Established the IP roadmap and defined the core technology stack. Specified the R&D team profile and role requirements. Structured the funding strategy and signed with an IP / Legal Advisor to guide patent and protection efforts, in parallel with the formation of the initial advisory board. Submitted the first R&D funding proposal.</p>
+        
+      </div>
+    </li>
+
+    <li class="roadmap-item" data-status="current">
+      <div class="roadmap-marker" aria-hidden="true">
+      </div>
+      <div class="roadmap-content">
+        <h4 class="roadmap-item-quarter">Q4 2025</h4>
+        <p class="roadmap-item-description">Advancing funding applications and strategic dialogues. Expanding the core team and refining the technical architecture for simulation-based validation and IP development.</p>
+      </div>
+    </li>
+
+    <li class="roadmap-item" data-status="upcoming">
+      <div class="roadmap-marker" aria-hidden="true"></div>
+      <div class="roadmap-content">
+        <h4 class="roadmap-item-quarter">Q2 2026</h4>
+        <p class="roadmap-item-description">Core IP development</p>
+        <p class="roadmap-item-status">Planned...</p>
+      </div>
+    </li>
+
+    <li class="roadmap-item" data-status="upcoming">
+      <div class="roadmap-marker" aria-hidden="true"></div>
+      <div class="roadmap-content">
+        <h4 class="roadmap-item-quarter">Q3 2027</h4>
+        <p class="roadmap-item-description">First Prototype (MVP)</p>
+        <p class="roadmap-item-status">Planned...</p>
+      </div>
+    </li>
+
+    <li class="roadmap-item" data-status="upcoming">
+      <div class="roadmap-marker" aria-hidden="true"></div>
+      <div class="roadmap-content">
+        <h4 class="roadmap-item-quarter">Q4 2027</h4>
+        <p class="roadmap-item-description">Begin first pilot program</p>
+        <p class="roadmap-item-status">Planned...</p>
+      </div>
+    </li>
+
+  </ol>
+</div>
     </section>
+
 
     <section id="opportunity" class="section-pad py-20 md:py-28" style="scroll-margin-top: var(--header-h);">
         <div class="container mx-auto px-4">
@@ -340,31 +635,87 @@
            <p class="lead mx-auto mt-4 text-lg text-muted md:text-xl">A mission-driven team of RF Systems engineers, AI researchers & industry veterans.</p>
          </div>
          <h3 class="h3 mt-16 text-center text-2xl font-bold md:text-3xl">Founding Team</h3>
-         <div class="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-3">
-           <div class="overflow-hidden rounded-xl border border-white/10 bg-card text-center shadow transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-cyan/40 hover:shadow-cyan-lg">
-			  <div class="photo h-56 bg-bg-950">
-				<img 
-				  src="images/founder_erick.jpg" 
-				  alt="Erick Lima, Founder & CEO" 
-				  class="h-full w-full object-cover object-center">
-			  </div>
-			  <div class="bio p-6">
-				<h4 class="h3 text-xl font-bold md:text-2xl">Erick Lima</h4>
-				<p class="font-semibold text-cyan">Founder & CEO</p>
-				<p class="mt-2 text-sm text-muted">Former Principal RF Systems Engineer — pioneering the convergence of sensing, communications, and intelligence to shape the next technological frontier.</p>
-			  </div>
-			</div>
-					   
-		   
-           <div class="overflow-hidden rounded-xl border border-white/10 bg-card text-center shadow transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-cyan/40 hover:shadow-cyan-lg"><div class="photo flex h-56 items-center justify-center bg-bg-950 text-muted">[Photo]</div><div class="bio p-6"><h4 class="h3 text-xl font-bold md:text-2xl">[Name]</h4><p class="font-semibold text-cyan">CTO (confidential appointment)</p><p class="mt-2 text-sm text-muted">IP-driven engineer with proven leadership in high-impact innovation across advanced communication and signal processing architectures.</p></div></div>
-           <div class="overflow-hidden rounded-xl border border-white/10 bg-card text-center shadow transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-cyan/40 hover:shadow-cyan-lg"><div class="photo flex h-56 items-center justify-center bg-bg-950 text-muted">[Photo]</div><div class="bio p-6"><h4 class="h3 text-xl font-bold md:text-2xl">[Name]</h4><p class="font-semibold text-cyan">COO / Strategy</p><p class="mt-2 text-sm text-muted">Ideal profile blends hands-on startup experience, business development acumen, and the ability to translate technology vision into market traction.</p></div></div>
-         </div>
+ 
+ <div class="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-3">
+
+	<div class="overflow-hidden rounded-xl border border-white/10 bg-card text-center shadow transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-cyan/40 hover:shadow-cyan-lg">
+	  <div class="photo h-56 bg-bg-950">
+		<img src="images/founder_erick.jpg" alt="Erick Lima, Founder & CEO" class="h-full w-full object-cover object-center">
+	  </div>
+	  <div class="bio p-6">
+		<h4 class="h3 text-xl font-bold md:text-2xl">Erick Lima</h4>
+		<p class="font-semibold text-cyan">Founder & CEO</p>
+		<p class="mt-2 text-sm text-muted">Former Principal RF Systems Engineer — pioneering the convergence of sensing, communications, and intelligence to shape the next technological frontier.</p>
+	  </div>
+	</div>
+
+  <div class="overflow-hidden rounded-xl border border-white/10 bg-card text-center shadow transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-cyan/40 hover:shadow-cyan-lg">
+    <div class="photo-placeholder flex h-56 items-center justify-center bg-bg-900">
+      <svg class="placeholder-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2.5C12 2.5 6.5 6.5 3.75 12C1 17.5 12 21.5 12 21.5C12 21.5 23 17.5 20.25 12C17.5 6.5 12 2.5 12 2.5Z" stroke="#22D3EE" stroke-width="1.5" stroke-opacity="0.3" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M12 12m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0" stroke="#22D3EE" stroke-width="1.5" stroke-opacity="0.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="bio p-6">
+      <h4 class="h3 text-xl font-bold md:text-2xl">[Name]</h4>
+      <p class="font-semibold text-cyan">CTO (confidential appointment)</p>
+      <p class="mt-2 text-sm text-muted">IP-driven engineer with proven leadership in high-impact innovation across advanced communication and signal processing architectures.</p>
+    </div>
+  </div>
+
+  <div class="overflow-hidden rounded-xl border border-white/10 bg-card text-center shadow transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-cyan/40 hover:shadow-cyan-lg">
+    <div class="photo-placeholder flex h-56 items-center justify-center bg-bg-900">
+       <svg class="placeholder-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2.5C12 2.5 6.5 6.5 3.75 12C1 17.5 12 21.5 12 21.5C12 21.5 23 17.5 20.25 12C17.5 6.5 12 2.5 12 2.5Z" stroke="#22D3EE" stroke-width="1.5" stroke-opacity="0.3" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M12 12m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0" stroke="#22D3EE" stroke-width="1.5" stroke-opacity="0.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="bio p-6">
+      <h4 class="h3 text-xl font-bold md:text-2xl">[Name]</h4>
+      <p class="font-semibold text-cyan">COO / Strategy</p>
+      <p class="mt-2 text-sm text-muted">Ideal profile blends hands-on startup experience, business development acumen, and the ability to translate technology vision into market traction.</p>
+    </div>
+  </div>
+</div>
+<style>
+  @keyframes pulseIcon {
+    0%, 100% {
+      opacity: 0.4;
+      transform: scale(0.95);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+  }
+
+  .photo-placeholder {
+    /* Uses your existing 'bg-900' color for a perfect match */
+    background-color: #080F1E; 
+    overflow: hidden;
+  }
+
+  .placeholder-icon {
+    opacity: 0.4;
+    animation: pulseIcon 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  /* Respects user preferences */
+  @media (prefers-reduced-motion: reduce) {
+    .placeholder-icon {
+      animation: none;
+      opacity: 0.5; /* Static opacity */
+    }
+  }
+</style>
+
+
          <h3 class="h3 mt-20 text-center text-2xl font-bold md:text-3xl">Strategic Advisors</h3>
          <div class="mx-auto mt-12 grid max-w-6xl grid-cols-2 gap-8 md:grid-cols-4">
-             <div class="text-center"><h4 class="h3 text-lg font-bold">[Advisor Name]</h4><p class="text-sm text-cyan opacity-90">Former Director, xx</p></div>
-             <div class="text-center"><h4 class="h3 text-lg font-bold">[Advisor Name]</h4><p class="text-sm text-cyan opacity-90">EX-xx, xx</p></div>
-             <div class="text-center"><h4 class="h3 text-lg font-bold">[Advisor Name]</h4><p class="text-sm text-cyan opacity-90">Partner, VC</p></div>
-             <div class="text-center"><h4 class="h3 text-lg font-bold">[Advisor Name]</h4><p class="text-sm text-cyan opacity-90">Ex-xx, Defence/Aerospace/Space</p></div>
+             <div class="text-center"><h4 class="h3 text-lg font-bold">[# Advisor 1]</h4><p class="text-sm text-cyan opacity-90">Senior Advisor (Designate) — Strategy & Growth</p></div>
+             <div class="text-center"><h4 class="h3 text-lg font-bold">[# Advisor 2]</h4><p class="text-sm text-cyan opacity-90">Senior Advisor (Designate) — IP and Technology </p></div>
+             <div class="text-center"><h4 class="h3 text-lg font-bold">[Advisor Name]</h4><p class="text-sm text-cyan opacity-90">-</p></div>
+             <div class="text-center"><h4 class="h3 text-lg font-bold">[Advisor Name]</h4><p class="text-sm text-cyan opacity-90">-</p></div>
          </div>
         </div>
     </section>
